@@ -14,23 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.carbondata.core.metadata.schema.partition;
 
-import java.util.List;
+package org.apache.spark.sql.common.util
 
-public class ListPartition extends AbstractPartition {
+import org.apache.spark.sql.hive.CarbonSessionState
+import org.apache.spark.sql.test.util.QueryTest
 
-  /**
-   * value list for list partition table
-   */
-  private List<String> listInfo;
 
-  public ListPartition(int id, List<String> listInfo) {
-    this.partitionId = id;
-    this.listInfo = listInfo;
-  }
+class Spark2QueryTest extends QueryTest {
 
-  public List<String> getListInfo() {
-    return listInfo;
-  }
+  val hiveClient = sqlContext.sparkSession.sessionState.asInstanceOf[CarbonSessionState]
+    .metadataHive
+
 }

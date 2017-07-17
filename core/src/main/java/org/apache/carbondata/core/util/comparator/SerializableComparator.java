@@ -14,29 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.carbondata.core.metadata.schema.partition;
 
-public abstract class AbstractPartition {
+package org.apache.carbondata.core.util.comparator;
 
-  /**
-   * Partition unique identifier
-   */
-  protected int partitionId;
+import java.io.Serializable;
 
-  /**
-   * Total row count of this partition
-   */
-  protected int rowCount;
-
-  public int getPartitionId() {
-    return partitionId;
-  }
-
-  public void setRowCount(int count) {
-    this.rowCount = count;
-  }
-
-  public int getRowCount() {
-    return rowCount;
-  }
+public interface SerializableComparator extends Serializable {
+  int compare(Object key1, Object key2);
 }
