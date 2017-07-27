@@ -172,9 +172,11 @@ public final class CarbonDataProcessorUtil {
   public static String getLocalDataFolderLocation(String databaseName, String tableName,
       String taskId, String partitionId, String segmentId, boolean isCompactionFlow) {
     String tempLocationKey =
-        getTempStoreLocationKey(databaseName, tableName, taskId, isCompactionFlow);
-    String baseStorePath = CarbonProperties.getInstance()
-        .getProperty(tempLocationKey, CarbonCommonConstants.STORE_LOCATION_DEFAULT_VAL);
+        getTempStoreLocationKey(databaseName, tableName, segmentId, taskId, isCompactionFlow);
+    String baseStorePath = CarbonProperties.getInstance().getProperty(tempLocationKey);
+    if (baseStorePath == null) {
+      LOGGER.warn("Location not set for the key " + tempLocationKey);
+    }
     CarbonTable carbonTable = CarbonMetadata.getInstance()
         .getCarbonTable(databaseName + CarbonCommonConstants.UNDERSCORE + tableName);
     CarbonTablePath carbonTablePath =
@@ -189,14 +191,15 @@ public final class CarbonDataProcessorUtil {
    *
    * @param databaseName
    * @param tableName
+   * @param segmentId
    * @param taskId
    * @param isCompactionFlow
    * @return
    */
-  public static String getTempStoreLocationKey(String databaseName, String tableName, String taskId,
-      boolean isCompactionFlow) {
+  public static String getTempStoreLocationKey(String databaseName, String tableName,
+      String segmentId, String taskId, boolean isCompactionFlow) {
     String tempLocationKey = databaseName + CarbonCommonConstants.UNDERSCORE + tableName
-        + CarbonCommonConstants.UNDERSCORE + taskId;
+        + CarbonCommonConstants.UNDERSCORE + segmentId + CarbonCommonConstants.UNDERSCORE + taskId;
     if (isCompactionFlow) {
       tempLocationKey = CarbonCommonConstants.COMPACTION_KEY_WORD + CarbonCommonConstants.UNDERSCORE
           + tempLocationKey;

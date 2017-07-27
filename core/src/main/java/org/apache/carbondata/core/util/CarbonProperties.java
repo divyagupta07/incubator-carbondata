@@ -83,17 +83,11 @@ public final class CarbonProperties {
     } catch (IllegalAccessException e) {
       LOGGER.error("Illelagal access to declared field" + e.getMessage());
     }
-    if (null == carbonProperties.getProperty(CarbonCommonConstants.STORE_LOCATION)) {
-      carbonProperties.setProperty(CarbonCommonConstants.STORE_LOCATION,
-          CarbonCommonConstants.STORE_LOCATION_DEFAULT_VAL);
-    }
 
     validateBlockletSize();
     validateNumCores();
     validateNumCoresBlockSort();
     validateSortSize();
-    validateHighCardinalityIdentify();
-    validateHighCardinalityThreshold();
     validateCarbonDataFileVersion();
     validateExecutorStartUpTime();
     validatePrefetchBufferSize();
@@ -446,41 +440,6 @@ public final class CarbonProperties {
               + CarbonCommonConstants.SORT_SIZE_DEFAULT_VAL);
       carbonProperties.setProperty(CarbonCommonConstants.SORT_SIZE,
           CarbonCommonConstants.SORT_SIZE_DEFAULT_VAL);
-    }
-  }
-
-  private void validateHighCardinalityIdentify() {
-    String highcardIdentifyStr =
-        carbonProperties.getProperty(CarbonCommonConstants.HIGH_CARDINALITY_IDENTIFY_ENABLE);
-    boolean validateBoolean = CarbonUtil.validateBoolean(highcardIdentifyStr);
-    if (!validateBoolean) {
-      LOGGER.info("The high cardinality identify value \"" + highcardIdentifyStr
-          + "\" is invalid. Using the default value \""
-          + CarbonCommonConstants.HIGH_CARDINALITY_IDENTIFY_ENABLE_DEFAULT);
-      carbonProperties.setProperty(CarbonCommonConstants.HIGH_CARDINALITY_IDENTIFY_ENABLE,
-          CarbonCommonConstants.HIGH_CARDINALITY_IDENTIFY_ENABLE_DEFAULT);
-    }
-  }
-
-  private void validateHighCardinalityThreshold() {
-    String highcardThresholdStr = carbonProperties
-        .getProperty(CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD,
-            CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_DEFAULT);
-    try {
-      int highcardThreshold = Integer.parseInt(highcardThresholdStr);
-      if (highcardThreshold < CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_MIN) {
-        LOGGER.info("The high cardinality threshold value \"" + highcardThresholdStr
-            + "\" is invalid. Using the min value \""
-            + CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_MIN);
-        carbonProperties.setProperty(CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD,
-            CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_MIN + "");
-      }
-    } catch (NumberFormatException e) {
-      LOGGER.info("The high cardinality threshold value \"" + highcardThresholdStr
-          + "\" is invalid. Using the default value \""
-          + CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_DEFAULT);
-      carbonProperties.setProperty(CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD,
-          CarbonCommonConstants.HIGH_CARDINALITY_THRESHOLD_DEFAULT);
     }
   }
 
