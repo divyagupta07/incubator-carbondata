@@ -693,12 +693,10 @@ public final class CarbonCommonConstants {
    * BIG_DECIMAL_MEASURE
    */
   public static final char BIG_DECIMAL_MEASURE = 'b';
-
   /**
    * BIG_INT_MEASURE
    */
   public static final char BIG_INT_MEASURE = 'd';
-
   /**
    * CARBON_PREFETCH_BUFFERSIZE
    */
@@ -1168,8 +1166,6 @@ public final class CarbonCommonConstants {
    */
   @CarbonProperty
   public static final String LOAD_SORT_SCOPE = "carbon.load.sort.scope";
-  @CarbonProperty
-  public static final String LOAD_USE_BATCH_SORT = "carbon.load.use.batch.sort";
 
   /**
    * If set to BATCH_SORT, the sorting scope is smaller and more index tree will be created,
@@ -1295,6 +1291,18 @@ public final class CarbonCommonConstants {
   @CarbonProperty
   public static final String CARBON_LEASE_RECOVERY_RETRY_INTERVAL =
       "carbon.lease.recovery.retry.interval";
+
+  /**
+   * whether to use multi directories when loading data,
+   * the main purpose is to avoid single-disk-hot-spot
+   */
+  @CarbonProperty
+  public static final String CARBON_USE_MULTI_TEMP_DIR = "carbon.use.multiple.temp.dir";
+
+  /**
+   * default value for multi temp dir
+   */
+  public static final String CARBON_USE_MULTI_TEMP_DIR_DEFAULT = "false";
 
   private CarbonCommonConstants() {
   }

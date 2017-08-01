@@ -33,6 +33,7 @@ import org.apache.carbondata.core.cache.dictionary.ManageDictionaryAndBTree
 import org.apache.carbondata.core.constants.CarbonCommonConstants
 import org.apache.carbondata.core.datastore.impl.FileFactory
 import org.apache.carbondata.core.fileoperations.FileWriteOperation
+import org.apache.carbondata.core.indexstore.DataMapStoreManager
 import org.apache.carbondata.core.metadata.{AbsoluteTableIdentifier, CarbonMetadata, CarbonTableIdentifier}
 import org.apache.carbondata.core.metadata.converter.ThriftWrapperSchemaConverterImpl
 import org.apache.carbondata.core.metadata.schema
@@ -141,7 +142,7 @@ class CarbonFileMetastore(conf: RuntimeConfig) extends CarbonMetaStore {
   def getTableFromMetadataCache(database: String, tableName: String): Option[TableMeta] = {
     metadata.tablesMeta
       .find(c => c.carbonTableIdentifier.getDatabaseName.equalsIgnoreCase(database) &&
-                 c.carbonTableIdentifier.getTableName.equalsIgnoreCase(tableName))
+        c.carbonTableIdentifier.getTableName.equalsIgnoreCase(tableName))
   }
 
   def tableExists(
@@ -216,8 +217,8 @@ class CarbonFileMetastore(conf: RuntimeConfig) extends CarbonMetaStore {
     }
     val wrapperTableInfo = schemaConverter
       .fromExternalToWrapperTableInfo(thriftTableInfo,
-          newTableIdentifier.getDatabaseName,
-          newTableIdentifier.getTableName,
+        newTableIdentifier.getDatabaseName,
+        newTableIdentifier.getTableName,
         absoluteTableIdentifier.getStorePath)
     val identifier =
       new CarbonTableIdentifier(newTableIdentifier.getDatabaseName,
@@ -228,8 +229,8 @@ class CarbonFileMetastore(conf: RuntimeConfig) extends CarbonMetaStore {
       identifier)
     addTableCache(wrapperTableInfo,
       AbsoluteTableIdentifier.from(absoluteTableIdentifier.getStorePath,
-      newTableIdentifier.getDatabaseName,
-      newTableIdentifier.getTableName))
+        newTableIdentifier.getDatabaseName,
+        newTableIdentifier.getTableName))
     path
   }
 
@@ -425,6 +426,7 @@ class CarbonFileMetastore(conf: RuntimeConfig) extends CarbonMetaStore {
       CarbonHiveMetadataUtil.invalidateAndDropTable(dbName, tableName, sparkSession)
       // discard cached table info in cachedDataSourceTables
       sparkSession.sessionState.catalog.refreshTable(tableIdentifier)
+      DataMapStoreManager.getInstance().clearDataMap(identifier, "blocklet")
     }
   }
 
@@ -492,4 +494,3 @@ class CarbonFileMetastore(conf: RuntimeConfig) extends CarbonMetaStore {
     CarbonUtil.readSchemaFile(tableMetadataFile)
   }
 }
-

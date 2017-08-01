@@ -165,7 +165,7 @@ public class StoreCreator {
       loadModel.setFactTimeStamp(System.currentTimeMillis());
       loadModel.setMaxColumns("10");
 
-      executeGraph(loadModel, absoluteTableIdentifier.getStorePath());
+      loadData(loadModel, absoluteTableIdentifier.getStorePath());
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -354,7 +354,7 @@ public class StoreCreator {
    * @param storeLocation
    * @throws Exception
    */
-  public static void executeGraph(CarbonLoadModel loadModel, String storeLocation)
+  public static void loadData(CarbonLoadModel loadModel, String storeLocation)
       throws Exception {
     new File(storeLocation).mkdirs();
     String outPutLoc = storeLocation + "/etl";
@@ -403,8 +403,9 @@ public class StoreCreator {
         format.createRecordReader(blockDetails, hadoopAttemptContext);
 
     CSVRecordReaderIterator readerIterator = new CSVRecordReaderIterator(recordReader, blockDetails, hadoopAttemptContext);
+    String[] storeLocationArray = new String[] {storeLocation};
     new DataLoadExecutor().execute(loadModel,
-        storeLocation,
+        storeLocationArray,
         new CarbonIterator[]{readerIterator});
 
     info.setDatabaseName(databaseName);

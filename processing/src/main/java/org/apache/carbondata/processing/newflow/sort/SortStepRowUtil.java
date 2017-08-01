@@ -17,8 +17,8 @@
 
 package org.apache.carbondata.processing.newflow.sort;
 
+import org.apache.carbondata.core.util.NonDictionaryUtil;
 import org.apache.carbondata.processing.sortandgroupby.sortdata.SortParameters;
-import org.apache.carbondata.processing.util.NonDictionaryUtil;
 
 public class SortStepRowUtil {
   public static Object[] convertRow(Object[] data, SortParameters parameters,
