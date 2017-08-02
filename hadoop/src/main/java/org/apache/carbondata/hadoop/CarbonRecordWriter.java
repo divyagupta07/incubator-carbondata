@@ -7,6 +7,10 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 public class CarbonRecordWriter<T> extends RecordWriter<Void, T> {
 
+  public CarbonRecordWriter(CarbonWriteSupport<T> writeSupport){
+
+  }
+
   @Override public void write(Void key, T value) throws IOException, InterruptedException {
 
   }

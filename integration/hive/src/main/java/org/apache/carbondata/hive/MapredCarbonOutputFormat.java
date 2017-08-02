@@ -25,6 +25,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
 import org.apache.hadoop.hive.ql.io.HiveOutputFormat;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
@@ -37,6 +38,11 @@ import org.apache.hadoop.util.Progressable;
 class MapredCarbonOutputFormat<T> extends CarbonOutputFormat<T>
     implements HiveOutputFormat<Void, T> {
 
+  protected CarbonOutputFormat<ArrayWritable> realOutputFormat;
+
+  public MapredCarbonOutputFormat(){
+    realOutputFormat = new CarbonOutputFormat<>();
+  }
   @Override
   public RecordWriter<Void, T> getRecordWriter(FileSystem fileSystem, JobConf jobConf, String s,
       Progressable progressable) throws IOException {
@@ -50,6 +56,6 @@ class MapredCarbonOutputFormat<T> extends CarbonOutputFormat<T>
   @Override public FileSinkOperator.RecordWriter getHiveRecordWriter(JobConf jc, Path finalOutPath,
       Class<? extends Writable> valueClass, boolean isCompressed, Properties tableProperties,
       Progressable progress) throws IOException {
-    return null;
+    return new CarbonRecordWriterWrapper(realOutputFormat, jc, finalOutPath.toString(), progress);
   }
 }

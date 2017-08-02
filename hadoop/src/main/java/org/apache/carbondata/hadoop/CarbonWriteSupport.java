@@ -5,9 +5,7 @@ import java.io.IOException;
 import org.apache.carbondata.core.metadata.AbsoluteTableIdentifier;
 import org.apache.carbondata.core.metadata.schema.table.column.CarbonColumn;
 
-/**
- * Created by divya on 12/7/17.
- */
+
 public class CarbonWriteSupport<T> {
 
   /**
