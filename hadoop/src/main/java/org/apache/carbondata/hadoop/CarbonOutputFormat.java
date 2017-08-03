@@ -8,12 +8,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 
-public class CarbonOutputFormat<T> extends FileOutputFormat<Void, T> {
+public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
 
   private static final String CARBON_WRITE_SUPPORT = "mapreduce.output.carbonoutputformat.writesupport";
 
@@ -22,11 +23,19 @@ public class CarbonOutputFormat<T> extends FileOutputFormat<Void, T> {
     Configuration configuration = job.getConfiguration();
     CarbonLoadModel loadModel = getCarbonLoadModel(configuration);
     CarbonWriteSupport<T> writeSupport = getWriteSupport(configuration);
-    return new CarbonRecordWriter<>(writeSupport);
+    //writeSupport.initialize();
+    return new CarbonRecordWriter<>(loadModel, writeSupport);
+  }
+
+  @Override public void checkOutputSpecs(JobContext context)
+      throws IOException, InterruptedException {
+
   }
 
   public CarbonLoadModel getCarbonLoadModel(Configuration configuration){
     CarbonLoadModel loadModel = new CarbonLoadModel();
+    //create load model using values from configuration
+    //set SinglePass to true
     return loadModel;
   }
 
@@ -45,16 +54,16 @@ public class CarbonOutputFormat<T> extends FileOutputFormat<Void, T> {
     }
 
     try {
-      if(writeSupportClass != null){
-        return (writeSupportClass.newInstance();
-      } else
-        return null;
+      if (writeSupportClass != null) {
+        return ((CarbonWriteSupport) writeSupportClass.newInstance());
+      } else return null;
 
     } catch (InstantiationException e) {
       throw new RuntimeException(e.getMessage(), e);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e.getMessage(), e);
     }
+  }
 
   public static void setOutputPath(TaskAttemptContext context, Path outputDir) {
     context.getConfiguration().set("mapred.output.dir", outputDir.toString());
