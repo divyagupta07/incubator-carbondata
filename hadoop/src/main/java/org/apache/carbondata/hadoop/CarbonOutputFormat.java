@@ -1,7 +1,13 @@
 package org.apache.carbondata.hadoop;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.apache.carbondata.core.metadata.AbsoluteTableIdentifier;
+import org.apache.carbondata.core.metadata.schema.table.CarbonTable;
+import org.apache.carbondata.core.metadata.schema.table.TableInfo;
+import org.apache.carbondata.hadoop.util.ObjectSerializationUtil;
 import org.apache.carbondata.processing.model.CarbonLoadModel;
 
 import org.apache.hadoop.fs.Path;
@@ -18,12 +24,17 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
 
   private static final String CARBON_WRITE_SUPPORT = "mapreduce.output.carbonoutputformat.writesupport";
 
+  private static final String TABLE_INFO = "mapreduce.input.carboninputformat.tableinfo";
+
+  private CarbonTable carbonTable;
+
   @Override public RecordWriter<Void, T> getRecordWriter(TaskAttemptContext job)
       throws IOException, InterruptedException {
     Configuration configuration = job.getConfiguration();
+    //validate database & table exist by reading the metastore
     CarbonLoadModel loadModel = getCarbonLoadModel(configuration);
     CarbonWriteSupport<T> writeSupport = getWriteSupport(configuration);
-    //writeSupport.initialize();
+
     return new CarbonRecordWriter<>(loadModel, writeSupport);
   }
 
@@ -32,9 +43,46 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
 
   }
 
-  public CarbonLoadModel getCarbonLoadModel(Configuration configuration){
+  /**
+   * Set the `tableInfo` in `configuration`
+   */
+  public static void setTableInfo(Configuration configuration, TableInfo tableInfo)
+      throws IOException {
+    if (null != tableInfo) {
+      configuration.set(TABLE_INFO, ObjectSerializationUtil.encodeToString(tableInfo.serialize()));
+    }
+  }
+
+  /**
+   * Get TableInfo object from `configuration`
+   */
+  private TableInfo getTableInfo(Configuration configuration) throws IOException {
+    String tableInfoStr = configuration.get(TABLE_INFO);
+    if (tableInfoStr == null) {
+      return null;
+    } else {
+      TableInfo output = new TableInfo();
+      output.readFields(
+          new DataInputStream(
+              new ByteArrayInputStream(
+                  ObjectSerializationUtil.decodeStringToBytes(tableInfoStr))));
+      return output;
+    }
+  }
+
+  public CarbonLoadModel getCarbonLoadModel(Configuration configuration) throws IOException{
     CarbonLoadModel loadModel = new CarbonLoadModel();
-    //create load model using values from configuration
+        //create load model using values from configuration
+    TableInfo tableInfo = getTableInfo(configuration);
+    loadModel.setTableName(tableInfo.getFactTable().getTableName());
+    loadModel.setDatabaseName(tableInfo.getDatabaseName());
+    loadModel.setStorePath(tableInfo.getStorePath());
+
+    loadModel.setUseOnePass(true);
+    //carbonLoadModel.setCarbonDataLoadSchema(dataLoadSchema)
+    //as we are using One pass sort_scope should not be Global_Sort
+    //Validate bad_record_path
+    //loadModel.setbadrecordsLocation
     //set SinglePass to true
     return loadModel;
   }
