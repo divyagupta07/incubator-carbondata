@@ -34,8 +34,10 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
     //validate database & table exist by reading the metastore
     CarbonLoadModel loadModel = getCarbonLoadModel(configuration);
     CarbonWriteSupport<T> writeSupport = getWriteSupport(configuration);
-
-    return new CarbonRecordWriter<>(loadModel, writeSupport);
+    writeSupport.initialize(loadModel, null);
+    //Initialize CarbonWriter
+    //change state of writer to start
+    return new CarbonRecordWriter<>(/*writer,*/ loadModel, writeSupport);
   }
 
   @Override public void checkOutputSpecs(JobContext context)
@@ -76,9 +78,13 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
     TableInfo tableInfo = getTableInfo(configuration);
     loadModel.setTableName(tableInfo.getFactTable().getTableName());
     loadModel.setDatabaseName(tableInfo.getDatabaseName());
+    //Verify whether database and table exist
+    // if not sys.error(s"Table $dbName.$tableName does not exist")
+    // Also, if (null == relation.tableMeta.carbonTable) sys.error(s"Data loading failed. table not found: $dbName.$tableName")
     loadModel.setStorePath(tableInfo.getStorePath());
-
+    // add the start entry for the new load in the table status file
     loadModel.setUseOnePass(true);
+    // generate predefined dictionary
     //carbonLoadModel.setCarbonDataLoadSchema(dataLoadSchema)
     //as we are using One pass sort_scope should not be Global_Sort
     //Validate bad_record_path
