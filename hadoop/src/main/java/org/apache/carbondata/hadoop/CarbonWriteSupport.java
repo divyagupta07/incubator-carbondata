@@ -137,7 +137,7 @@ public class CarbonWriteSupport<T> {
                 tableBlock.getLocations()));
       }
       BlockDetails[] blockDetailsArray = (BlockDetails[]) blockDetailsList.toArray();
-      blocksGroupByList.add(new Tuple2<>(nodeBlockMappingKey, blockDetailsArray);
+      blocksGroupByList.add(new Tuple2<>(nodeBlockMappingKey, blockDetailsArray));
     }
 
     Tuple2<String, BlockDetails[]>[] blockGroupBy = (Tuple2<String, BlockDetails[]>[]) blocksGroupByList.toArray();
