@@ -35,9 +35,8 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
     CarbonLoadModel loadModel = getCarbonLoadModel(configuration);
     CarbonWriteSupport<T> writeSupport = getWriteSupport(configuration);
     writeSupport.initialize(loadModel, null);
-    //Initialize CarbonWriter
-    //change state of writer to start
-    return new CarbonRecordWriter<>(/*writer,*/ loadModel, writeSupport);
+
+    return new CarbonRecordWriter<>(loadModel, writeSupport);
   }
 
   @Override public void checkOutputSpecs(JobContext context)
@@ -76,7 +75,7 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
     CarbonLoadModel loadModel = new CarbonLoadModel();
         //create load model using values from configuration
     TableInfo tableInfo = getTableInfo(configuration);
-    loadModel.setTableName(tableInfo.getFactTable().getTableName());
+   /* loadModel.setTableName(tableInfo.getFactTable().getTableName());
     loadModel.setDatabaseName(tableInfo.getDatabaseName());
     //Verify whether database and table exist
     // if not sys.error(s"Table $dbName.$tableName does not exist")
@@ -89,34 +88,37 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
     //as we are using One pass sort_scope should not be Global_Sort
     //Validate bad_record_path
     //loadModel.setbadrecordsLocation
-    //set SinglePass to true
+    //set SinglePass to true*/
     return loadModel;
   }
 
   public CarbonWriteSupport<T> getWriteSupport(Configuration configuration) {
     String className = configuration.get(CARBON_WRITE_SUPPORT);
+    CarbonWriteSupport writeSupport = null;
+    if (className != null) {
+      Class<?> writeSupportClass;
+      try {
+        writeSupportClass = configuration.getClassByName(className);
+      } catch (ClassNotFoundException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
 
-    if (className == null) {
-      return null;
+      try {
+        if (writeSupportClass != null) {
+          writeSupport = ((CarbonWriteSupport) writeSupportClass.newInstance());
+        }
+      } catch (InstantiationException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
     }
-    Class<?> writeSupportClass;
-    try {
-      writeSupportClass = configuration.getClassByName(className);
 
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e.getMessage(), e);
+    if(writeSupport == null) {
+      writeSupport = new CarbonWriteSupport();
     }
 
-    try {
-      if (writeSupportClass != null) {
-        return ((CarbonWriteSupport) writeSupportClass.newInstance());
-      } else return null;
-
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e.getMessage(), e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e.getMessage(), e);
-    }
+    return writeSupport;
   }
 
   public static void setOutputPath(TaskAttemptContext context, Path outputDir) {
