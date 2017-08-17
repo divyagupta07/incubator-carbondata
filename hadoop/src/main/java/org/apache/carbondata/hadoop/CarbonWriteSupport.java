@@ -23,8 +23,11 @@ public class CarbonWriteSupport<T> {
    * convert column data back to row representation
    * @param data column data
    */
-  void writeRecord(Object[] data){
-
+  void write(T data){
+    //write the data
+    //Array[CarbonIterator[Array[AnyRef]]] recordReaders = getInputIterators
+    //val executor = new DataLoadExecutor()
+    //executor.execute(loadModel, storeLocation, recordReaders)
   }
 
   /**
