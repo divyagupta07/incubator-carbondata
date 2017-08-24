@@ -1714,6 +1714,34 @@ public final class CarbonUtil {
   }
 
   /**
+   * validate the storage level
+   * @param storageLevel
+   * @return boolean
+   */
+  public static boolean isValidStorageLevel(String storageLevel) {
+    if (null == storageLevel || storageLevel.trim().equals("")) {
+      return false;
+    }
+    switch (storageLevel.toUpperCase()) {
+      case "DISK_ONLY":
+      case "DISK_ONLY_2":
+      case "MEMORY_ONLY":
+      case "MEMORY_ONLY_2":
+      case "MEMORY_ONLY_SER":
+      case "MEMORY_ONLY_SER_2":
+      case "MEMORY_AND_DISK":
+      case "MEMORY_AND_DISK_2":
+      case "MEMORY_AND_DISK_SER":
+      case "MEMORY_AND_DISK_SER_2":
+      case "OFF_HEAP":
+      case "NONE":
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /**
    * validate teh batch size
    *
    * @param value
@@ -1920,6 +1948,12 @@ public final class CarbonUtil {
         return new byte[8];
       default:
         throw new IllegalArgumentException("Invalid data type: " + meta.getType());
+    }
+  }
+
+  public static void requireNotNull(Object obj) {
+    if (obj == null) {
+      throw new IllegalArgumentException("parameter not be null");
     }
   }
 }

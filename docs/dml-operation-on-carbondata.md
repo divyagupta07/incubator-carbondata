@@ -149,7 +149,7 @@ You can use the following options to load data:
    
    * If this option is set to TRUE, then high.cardinality.identify.enable property will be disabled during data load.
    
-### Example:
+  ### Example:
 
 ```
 LOAD DATA local inpath '/opt/rawdata/data.csv' INTO table carbontable
@@ -164,6 +164,43 @@ options('DELIMITER'=',', 'QUOTECHAR'='"','COMMENTCHAR'='#',
 )
 ```
 
+- **BAD RECORDS HANDLING:** Methods of handling bad records are as follows:
+
+    * Load all of the data before dealing with the errors.
+
+    * Clean or delete bad records before loading data or stop the loading when bad records are found.
+
+    ```
+    OPTIONS('BAD_RECORDS_LOGGER_ENABLE'='true', 'BAD_RECORD_PATH'='hdfs://hacluster/tmp/carbon', 'BAD_RECORDS_ACTION'='REDIRECT', 'IS_EMPTY_DATA_BAD_RECORD'='false')
+    ```
+
+    NOTE:
+
+    * If the REDIRECT option is used, Carbon will add all bad records in to a separate CSV file. However, this file must not be used for subsequent data loading because the content may not exactly match the source record. You are advised to cleanse the original source record for further data ingestion. This option is used to remind you which records are bad records.
+
+    * In loaded data, if all records are bad records, the BAD_RECORDS_ACTION is invalid and the load operation fails.
+
+    * The maximum number of characters per column is 100000. If there are more than 100000 characters in a column, data loading will fail.
+
+### Example:
+
+```
+LOAD DATA INPATH 'filepath.csv'
+INTO TABLE tablename
+OPTIONS('BAD_RECORDS_LOGGER_ENABLE'='true',
+'BAD_RECORD_PATH'='hdfs://hacluster/tmp/carbon',
+'BAD_RECORDS_ACTION'='REDIRECT',
+'IS_EMPTY_DATA_BAD_RECORD'='false');
+```
+
+ **Bad Records Management Options:**
+
+ | Options                   | Default Value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+ |---------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+ | BAD_RECORDS_LOGGER_ENABLE | false         | Whether to create logs with details about bad records.                                                                                                                                                                                                                                                                                                                                                                                                   |
+ | BAD_RECORDS_ACTION        | FAIL          | Following are the four types of action for bad records:  FORCE: Auto-corrects the data by storing the bad records as NULL.  REDIRECT: Bad records are written to the raw CSV instead of being loaded.  IGNORE: Bad records are neither loaded nor written to the raw CSV.  FAIL: Data loading fails if any bad records are found.  NOTE: In loaded data, if all records are bad records, the BAD_RECORDS_ACTION is invalid and the load operation fails. |
+ | IS_EMPTY_DATA_BAD_RECORD  | false         | If false, then empty ("" or '' or ,,) data will not be considered as bad record and vice versa.                                                                                                                                                                                                                                                                                                                                                          |
+ | BAD_RECORD_PATH           | -             | Specifies the HDFS path where bad records are stored. By default the value is Null. This path must to be configured by the user if bad record logger is enabled or bad record action redirect.                                                                                                                                                                                                                                                           |
 
 ## INSERT DATA INTO A CARBONDATA TABLE
 
@@ -268,7 +305,7 @@ SHOW SEGMENTS FOR Table [db_name.]table_name LIMIT number_of_segments
 After you retrieve the segment ID of the segment that you want to delete, execute the following command to delete the selected segment.
 
 ```
-DELETE FROM TABLE [db_name.]table_name WHERE SEGMENT.ID IN (segment_id1, segments_id2, ....)
+DELETE FROM TABLE [db_name.]table_name WHERE SEGMENT.ID IN (segment_id1, segments_id2, ...)
 ```
 
 ### Parameter Description
@@ -319,7 +356,7 @@ This command will allow to update the carbon table based on the column expressio
 ```
  UPDATE <table_name>
  SET (column_name1, column_name2, ... column_name n) =
- (column1_expression , column2_expression . .. column n_expression )
+ (column1_expression , column2_expression, ... column n_expression )
  [ WHERE { <filter_condition> } ];
 ```
 
@@ -327,7 +364,7 @@ alternatively the following the command can also be used for updating the Carbon
 
 ```
 UPDATE <table_name>
-SET (column_name1, column_name2,) =
+SET (column_name1, column_name2) =
 (select sourceColumn1, sourceColumn2 from sourceTable
 [ WHERE { <filter_condition> } ] )
 [ WHERE { <filter_condition> } ];
@@ -441,7 +478,7 @@ column1 = 'USA');
 ```
 
 ```
-DELETE FROM columncarbonTable1 WHERE column2 >= 4
+DELETE FROM columncarbonTable1 WHERE column2 >= 4;
 ```
 
 **The Status Success/Failure shall be captured in the driver log and the client.**

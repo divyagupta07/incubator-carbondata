@@ -50,11 +50,11 @@ The following DDL operations are supported in CarbonData :
 
 | Parameter | Description | Optional |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| db_name | Name of the database. Database name should consist of alphanumeric characters and underscore(\_) special character. | Yes |
-| field_list | Comma separated List of fields with data type. The field names should consist of alphanumeric characters and underscore(\_) special character. | No |
-| table_name | The name of the table in Database. Table Name should consist of alphanumeric characters and underscore(\_) special character. | No |
-| STORED BY | "org.apache.carbondata.format", identifies and creates a CarbonData table. | No |
-| TBLPROPERTIES | List of CarbonData table properties. |  |
+| db_name | Name of the database. Database name should consist of alphanumeric characters and underscore(\_) special character. | YES |
+| field_list | Comma separated List of fields with data type. The field names should consist of alphanumeric characters and underscore(\_) special character. | NO |
+| table_name | The name of the table in Database. Table name should consist of alphanumeric characters and underscore(\_) special character. | NO |
+| STORED BY | "org.apache.carbondata.format", identifies and creates a CarbonData table. | NO |
+| TBLPROPERTIES | List of CarbonData table properties. | YES |
 
 ### Usage Guidelines
 
@@ -127,6 +127,20 @@ The following DDL operations are supported in CarbonData :
                      'SORT_COLUMNS'='productName,storeCity')
 ```
 
+   - **SORT_COLUMNS**
+
+    This table property specifies the order of the sort column.
+
+```
+    TBLPROPERTIES('SORT_COLUMNS'='column1, column3')
+```
+
+   NOTE:
+
+   - If this property is not specified, then by default SORT_COLUMNS consist of all dimension (exclude Complex Column).
+
+   - If this property is specified but with empty argument, then the table will be loaded without sort. For example, ('SORT_COLUMNS'='')
+
 ## SHOW TABLE
 
   This command can be used to list all the tables in current database or all the tables of a specific database.
@@ -137,7 +151,7 @@ The following DDL operations are supported in CarbonData :
 ### Parameter Description
 | Parameter  | Description                                                                               | Optional |
 |------------|-------------------------------------------------------------------------------------------|----------|
-| IN db_Name | Name of the database. Required only if tables of this specific database are to be listed. | Yes      |
+| IN db_Name | Name of the database. Required only if tables of this specific database are to be listed. | YES      |
 
 ### Example:
 ```
@@ -156,11 +170,11 @@ This command is used to rename the existing table.
 ```
 
 #### Parameter Description
-| Parameter     | Description                                                                                   |
-|---------------|-----------------------------------------------------------------------------------------------|
-| db_Name       | Name of the database. If this parameter is left unspecified, the current database is selected.|
-|table_name     | Name of the existing table.                                                                   |
-|new_table_name | New table name for the existing table.                                                        |
+| Parameter     | Description                                                                                   | Optional |
+|---------------|-----------------------------------------------------------------------------------------------|----------|
+| db_Name       | Name of the database. If this parameter is left unspecified, the current database is selected.|   YES    |
+|table_name     | Name of the existing table.                                                                   |   NO     |
+|new_table_name | New table name for the existing table.                                                        |   NO     |
 
 #### Usage Guidelines
 
@@ -190,11 +204,11 @@ This command is used to add a new column to the existing table.
 ```
 
 #### Parameter Description
-| Parameter          | Description                                                                                               |
-|--------------------|-----------------------------------------------------------------------------------------------------------|
-| db_Name            | Name of the database. If this parameter is left unspecified, the current database is selected.            |
-| table_name         | Name of the existing table.                                                                               |
-| col_name data_type | Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_). |
+| Parameter        | Description                                                                                               |Optional|
+|------------------|-----------------------------------------------------------------------------------------------------------|------------|
+|db_Name           | Name of the database. If this parameter is left unspecified, the current database is selected.            |YES|
+|table_name        | Name of the existing table.                                                                               |NO |
+|col_name data_type| Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_). |NO |
 
 NOTE: Do not name the column after name, tupleId, PositionId, and PositionReference when creating Carbon tables because they are used internally by UPDATE, DELETE, and secondary index.
 
@@ -237,11 +251,11 @@ This command is used to delete a existing column or multiple columns in a table.
 ```
 
 #### Parameter Description
-| Parameter  | Description                                                                                              |
-|------------|----------------------------------------------------------------------------------------------------------|
-| db_Name    | Name of the database. If this parameter is left unspecified, the current database is selected.           |
-| table_name | Name of the existing table.                                                                              |
-| col_name   | Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_) |
+| Parameter  | Description                                                                                              | Optional |
+|------------|----------------------------------------------------------------------------------------------------------|----------|
+| db_Name    | Name of the database. If this parameter is left unspecified, the current database is selected.           |  YES     |
+| table_name | Name of the existing table.                                                                              |  NO      |
+| col_name   | Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_) | NO      |
 
 #### Usage Guidelines
 
@@ -267,12 +281,9 @@ If the table contains 4 columns namely a1, b1, c1, and d1.
 - **To delete multiple columns:**
 
 ```
-   ALTER TABLE carbon DROP COLUMNS (b1,c1);
+   ALTER TABLE carbon DROP COLUMNS (c1,d1);
 ```
 
-```
-   ALTER TABLE carbon DROP COLUMNS (b1,c1);
-```
 
 ### **CHANGE DATA TYPE**
 
@@ -284,12 +295,12 @@ This command is used to change the data type from INT to BIGINT or decimal preci
 ```
 
 #### Parameter Description
-| Parameter           | Description                                                                                               |
-|---------------------|-----------------------------------------------------------------------------------------------------------|
-| db_Name             | Name of the database. If this parameter is left unspecified, the current database is selected.            |
-| table_name          | Name of the existing table.                                                                               |
-| col_name            | Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_). |
-| changed_column_type | The change in the data type.                                                                              |
+| Parameter           | Description                                                                                               |Optional|
+|---------------------|-----------------------------------------------------------------------------------------------------------|-------|
+| db_Name             | Name of the database. If this parameter is left unspecified, the current database is selected.            |  YES  |
+| table_name          | Name of the existing table.                                                                               |  NO |
+| col_name            | Name of comma-separated column with data type. Column names contain letters, digits, and underscores (\_). | NO |
+| changed_column_type | The change in the data type.                                                                              |  NO |
 
 #### Usage Guidelines
 

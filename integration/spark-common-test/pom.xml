@@ -137,7 +137,6 @@
         <version>1.0</version>
         <!-- Note config is repeated in surefire config -->
         <configuration>
-          <skipTests>false</skipTests>
           <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
           <junitxml>.</junitxml>
           <filereports>CarbonTestSuite.txt</filereports>
@@ -185,9 +184,6 @@
     </profile>
     <profile>
       <id>spark-1.6</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
       <dependencies>
         <dependency>
           <groupId>org.apache.carbondata</groupId>
@@ -209,6 +205,9 @@
     </profile>
     <profile>
       <id>spark-2.1</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>org.apache.carbondata</groupId>

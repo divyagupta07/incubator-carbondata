@@ -190,6 +190,7 @@ public final class CarbonCommonConstants {
    * Bytes for string 0, it is used in codegen in case of null values.
    */
   public static final byte[] ZERO_BYTE_ARRAY = "0".getBytes();
+
   /**
    * FILE STATUS IN-PROGRESS
    */
@@ -309,6 +310,10 @@ public final class CarbonCommonConstants {
    */
   @CarbonProperty
   public static final String NUM_CORES_COMPACTING = "carbon.number.of.cores.while.compacting";
+  /**
+   * Number of cores to be used while alter partition
+   */
+  public static final String NUM_CORES_ALT_PARTITION = "carbon.number.of.cores.while.altPartition";
   /**
    * Number of cores to be used for block sort
    */
@@ -963,12 +968,17 @@ public final class CarbonCommonConstants {
   /**
    * If the level 2 compaction is done in minor then new compacted segment will end with .2
    */
-  public static String LEVEL2_COMPACTION_INDEX = ".2";
+  public static final String LEVEL2_COMPACTION_INDEX = ".2";
 
   /**
    * Indicates compaction
    */
-  public static String COMPACTION_KEY_WORD = "COMPACTION";
+  public static final String COMPACTION_KEY_WORD = "COMPACTION";
+
+  /**
+   * Indicates alter partition
+   */
+  public static String ALTER_PARTITION_KEY_WORD = "ALTER_PARTITION";
 
   /**
    * hdfs temporary directory key
@@ -985,30 +995,30 @@ public final class CarbonCommonConstants {
   /**
    * File created in case of minor compaction request
    */
-  public static String minorCompactionRequiredFile = "compactionRequired_minor";
+  public static final String minorCompactionRequiredFile = "compactionRequired_minor";
 
   /**
    * File created in case of major compaction request
    */
-  public static String majorCompactionRequiredFile = "compactionRequired_major";
+  public static final String majorCompactionRequiredFile = "compactionRequired_major";
 
   /**
    * @Deprecated : This property has been deprecated.
    * Property for enabling system level compaction lock.1 compaction can run at once.
    */
   @CarbonProperty
-  public static String ENABLE_CONCURRENT_COMPACTION = "carbon.concurrent.compaction";
+  public static final String ENABLE_CONCURRENT_COMPACTION = "carbon.concurrent.compaction";
 
   /**
    * Default value of Property for enabling system level compaction lock.1 compaction can run
    * at once.
    */
-  public static String DEFAULT_ENABLE_CONCURRENT_COMPACTION = "true";
+  public static final String DEFAULT_ENABLE_CONCURRENT_COMPACTION = "true";
 
   /**
    * Compaction system level lock folder.
    */
-  public static String SYSTEM_LEVEL_COMPACTION_LOCK_FOLDER = "SystemCompactionLock";
+  public static final String SYSTEM_LEVEL_COMPACTION_LOCK_FOLDER = "SystemCompactionLock";
 
   /**
    * This batch size is used to send rows from load step to another step in batches.
@@ -1048,34 +1058,34 @@ public final class CarbonCommonConstants {
   /**
    * columns which gets updated in update will have header ends with this extension.
    */
-  public static String UPDATED_COL_EXTENSION = "-updatedColumn";
+  public static final String UPDATED_COL_EXTENSION = "-updatedColumn";
 
   /**
    * appending the key to differentiate the update flow with insert flow.
    */
-  public static String RDDUTIL_UPDATE_KEY = "UPDATE_";
+  public static final String RDDUTIL_UPDATE_KEY = "UPDATE_";
 
   /**
    * to determine to use the rdd persist or not.
    */
   @CarbonProperty
-  public static String isPersistEnabled = "carbon.update.persist.enable";
+  public static final String isPersistEnabled = "carbon.update.persist.enable";
 
   /**
    * for enabling or disabling Horizontal Compaction.
    */
   @CarbonProperty
-  public static String isHorizontalCompactionEnabled = "carbon.horizontal.compaction.enable";
+  public static final String isHorizontalCompactionEnabled = "carbon.horizontal.compaction.enable";
 
   /**
    * Default value for HorizontalCompaction is true.
    */
-  public static String defaultIsHorizontalCompactionEnabled = "true";
+  public static final String defaultIsHorizontalCompactionEnabled = "true";
 
   /**
    * by default rdd will be persisted in the update case.
    */
-  public static String defaultValueIsPersistEnabled = "true";
+  public static final String defaultValueIsPersistEnabled = "true";
 
   /**
    * current data file version
@@ -1089,7 +1099,7 @@ public final class CarbonCommonConstants {
   /**
    * Maximum no of column supported
    */
-  public static int DEFAULT_MAX_NUMBER_OF_COLUMNS = 20000;
+  public static final int DEFAULT_MAX_NUMBER_OF_COLUMNS = 20000;
 
   /**
    * Maximum waiting time (in seconds) for a query for requested executors to be started
@@ -1303,6 +1313,22 @@ public final class CarbonCommonConstants {
    * default value for multi temp dir
    */
   public static final String CARBON_USE_MULTI_TEMP_DIR_DEFAULT = "false";
+
+  /**
+   * Which storage level to persist rdd when sort_scope=global_sort
+   */
+  @CarbonProperty
+  public static final String CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL =
+      "carbon.global.sort.rdd.storage.level";
+
+  /**
+   * The default value(MEMORY_ONLY) is designed for executors with big memory, if user's executor
+   * has less memory, set the CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL to MEMORY_AND_DISK_SER or
+   * other storage level to correspond to different environment.
+   * You can get more recommendations about storage level in spark website:
+   * http://spark.apache.org/docs/latest/rdd-programming-guide.html#rdd-persistence.
+   */
+  public static final String CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL_DEFAULT = "MEMORY_ONLY";
 
   private CarbonCommonConstants() {
   }

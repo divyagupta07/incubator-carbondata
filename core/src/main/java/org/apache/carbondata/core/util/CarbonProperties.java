@@ -139,7 +139,8 @@ public final class CarbonProperties {
   private void validateLockType() {
     String lockTypeConfigured = carbonProperties.getProperty(CarbonCommonConstants.LOCK_TYPE);
     if (null != lockTypeConfigured) {
-      switch (lockTypeConfigured.toUpperCase()) {
+      lockTypeConfigured = lockTypeConfigured.toUpperCase();
+      switch (lockTypeConfigured) {
         // if user is setting the lock type as CARBON_LOCK_TYPE_ZOOKEEPER then no need to validate
         // else validate based on the file system type for LOCAL file system lock will be
         // CARBON_LOCK_TYPE_LOCAL and for the distributed one CARBON_LOCK_TYPE_HDFS
@@ -660,7 +661,7 @@ public final class CarbonProperties {
         CarbonCommonConstants.DEFAULT_SEGMENT_LEVEL_THRESHOLD);
     int[] compactionSize = getIntArray(commaSeparatedLevels);
 
-    if (null == compactionSize) {
+    if (0 == compactionSize.length) {
       compactionSize = getIntArray(CarbonCommonConstants.DEFAULT_SEGMENT_LEVEL_THRESHOLD);
     }
 
@@ -680,7 +681,7 @@ public final class CarbonProperties {
         int size = Integer.parseInt(levelSize.trim());
         if (validate(size, 100, 0, -1) < 0) {
           // if given size is out of boundary then take default value for all levels.
-          return null;
+          return new int[0];
         }
         compactionSize[i++] = size;
       } catch (NumberFormatException e) {
@@ -688,7 +689,7 @@ public final class CarbonProperties {
             "Given value for property" + CarbonCommonConstants.COMPACTION_SEGMENT_LEVEL_THRESHOLD
                 + " is not proper. Taking the default value "
                 + CarbonCommonConstants.DEFAULT_SEGMENT_LEVEL_THRESHOLD);
-        return null;
+        return new int[0];
       }
     }
     return compactionSize;
@@ -867,12 +868,30 @@ public final class CarbonProperties {
         CarbonCommonConstants.CARBON_USE_MULTI_TEMP_DIR_DEFAULT);
     boolean validateBoolean = CarbonUtil.validateBoolean(usingMultiDirStr);
     if (!validateBoolean) {
-      LOGGER.info("The carbon.use.multiple.temp.dir configuration value is invalid."
+      LOGGER.error("The carbon.use.multiple.temp.dir configuration value is invalid."
           + "Configured value: \"" + usingMultiDirStr + "\"."
           + "Data Load will not use multiple temp directories.");
       usingMultiDirStr = CarbonCommonConstants.CARBON_USE_MULTI_TEMP_DIR_DEFAULT;
     }
     return usingMultiDirStr.equalsIgnoreCase("true");
+  }
+
+  /**
+   * Return valid storage level
+   * @return String
+   */
+  public String getGlobalSortRddStorageLevel() {
+    String storageLevel = getProperty(CarbonCommonConstants.CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL,
+        CarbonCommonConstants.CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL_DEFAULT);
+    boolean validateStorageLevel = CarbonUtil.isValidStorageLevel(storageLevel);
+    if (!validateStorageLevel) {
+      LOGGER.error("The " + CarbonCommonConstants.CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL
+          + " configuration value is invalid. It will use default storage level("
+          + CarbonCommonConstants.CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL_DEFAULT
+          + ") to persist rdd.");
+      storageLevel = CarbonCommonConstants.CARBON_GLOBAL_SORT_RDD_STORAGE_LEVEL_DEFAULT;
+    }
+    return storageLevel.toUpperCase();
   }
 
   /**
