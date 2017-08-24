@@ -53,20 +53,17 @@ class MapredCarbonOutputFormat<T> extends CarbonOutputFormat<T>
 
   }
 
-  @Override public FileSinkOperator.RecordWriter getHiveRecordWriter(JobConf jc, Path finalOutPath,
+  @Override public FileSinkOperator.RecordWriter getHiveRecordWriter(JobConf hadoopJobConf, Path finalOutPath,
       Class<? extends Writable> valueClass, boolean isCompressed, Properties tableProperties,
       Progressable progress) throws IOException {
 
-    JobConf properties = new JobConf();
-    properties.set("carbondata.current.database",jc.get("hive.current.database"));
-    //Extract database_name and tablename from location
-    properties.set("carbondata.current.location",jc.get("location"));
-    properties.set("carbondata.schema.dataTypes",jc.get("columns.types"));
-    properties.set("carbondata.schema.columnNames",jc.get("columns"));
-    properties.set("carbondata.serde.lib",jc.get("serialization.lib"));
-    properties.set("carbondata.input.format",jc.get("file.inputformat"));
-
-    return new CarbonRecordWriterWrapper(realOutputFormat, properties, finalOutPath.toString(), progress,
-        tableProperties);
+      hadoopJobConf.set("carbondata.current.database", hadoopJobConf.get("hive.current.database"));
+      //Extract database_name and tablename from location
+      hadoopJobConf.set("carbondata.current.location", hadoopJobConf.get("location"));
+      hadoopJobConf.set("carbondata.schema.dataTypes", hadoopJobConf.get("columns.types"));
+      hadoopJobConf.set("carbondata.schema.columnNames", hadoopJobConf.get("columns"));
+      hadoopJobConf.set("carbondata.serde.lib", hadoopJobConf.get("serialization.lib"));
+      hadoopJobConf.set("carbondata.input.format", hadoopJobConf.get("file.inputformat"));
+    return new CarbonRecordWriterWrapper(realOutputFormat, hadoopJobConf, finalOutPath.toString(), progress);
   }
 }

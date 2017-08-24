@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.carbondata.core.metadata.schema.table.CarbonTable;
 import org.apache.carbondata.core.metadata.schema.table.TableInfo;
+import org.apache.carbondata.core.metadata.schema.table.TableSchema;
 import org.apache.carbondata.core.mutate.CarbonUpdateUtil;
 import org.apache.carbondata.hadoop.util.ObjectSerializationUtil;
 import org.apache.carbondata.processing.model.CarbonDataLoadSchema;
@@ -69,41 +70,59 @@ public class CarbonOutputFormat<T> extends OutputFormat<Void, T> {
 
   @Override public void checkOutputSpecs(JobContext context)
       throws IOException, InterruptedException {
+  }
 
+  private TableSchema getTableSchema(Configuration configuration) {
+    String storePath = configuration.get(LOCATION);
+    String tableName = storePath.substring(storePath.lastIndexOf("/") + 1, storePath.length()-1);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setTableName(tableName);
+    return tableSchema;
   }
 
   /**
    * Get TableInfo object from `configuration`
    */
-  private TableInfo getTableInfo(Configuration configuration) throws IOException {
-    String uniqueTableName = configuration.get(LOCATION);
+  private TableInfo getTableInfo(Configuration configuration) throws Exception {
     TableInfo tableInfo = new TableInfo();
-    tableInfo.setDatabaseName(configuration.get(DATABASE_NAME));
-    tableInfo.setTableUniqueName(configuration.get(DATABASE_NAME) + uniqueTableName
-        .substring(uniqueTableName.lastIndexOf("/") + 1));
-    //todo add store location in the tableInfo, extract it from the above defined variable LOCATION
-    tableInfo.setStorePath("");
-    return tableInfo;
+    try {
+      String uniqueTableName = configuration.get(LOCATION);
+      tableInfo.setFactTable(getTableSchema(configuration));
+      tableInfo.setDatabaseName(configuration.get(DATABASE_NAME));
+      tableInfo.setTableUniqueName(configuration.get(DATABASE_NAME) + uniqueTableName
+              .substring(uniqueTableName.lastIndexOf("/") + 1));
+      //todo add store location in the tableInfo, extract it from the above defined variable LOCATION
+      tableInfo.setStorePath("");
+      return tableInfo;
+    } catch (Exception exception) {
+      System.out.println("Exception occured while fetching TableInfo " + exception.getMessage());
+      throw new RuntimeException(exception.getMessage());
+    }
   }
 
   public CarbonLoadModel getCarbonLoadModel(Configuration configuration) throws IOException {
-    CarbonLoadModel loadModel = new CarbonLoadModel();
-    TableInfo tableInfo = getTableInfo(configuration);
-    loadModel.setTableName(tableInfo.getFactTable().getTableName());
-    loadModel.setDatabaseName(tableInfo.getDatabaseName());
-    loadModel.setStorePath(tableInfo.getStorePath());
-    /**
-     * Use one pass to generate dictionary
-     */
-    loadModel.setUseOnePass(true);
-    loadModel.setCarbonDataLoadSchema(getCarbonLoadSchema(configuration));
-    loadModel.setFactTimeStamp(CarbonUpdateUtil.readCurrentTime());
-    //todo add path for bad records
-    loadModel.setBadRecordsLocation("");
-    return loadModel;
+    try {
+      CarbonLoadModel loadModel = new CarbonLoadModel();
+      TableInfo tableInfo = getTableInfo(configuration);
+      loadModel.setTableName(tableInfo.getFactTable().getTableName());
+      loadModel.setDatabaseName(tableInfo.getDatabaseName());
+      loadModel.setStorePath(tableInfo.getStorePath());
+      /**
+       * Use one pass to generate dictionary
+       */
+      loadModel.setUseOnePass(true);
+      loadModel.setCarbonDataLoadSchema(getCarbonLoadSchema(configuration));
+      loadModel.setFactTimeStamp(CarbonUpdateUtil.readCurrentTime());
+      //todo add path for bad records
+      loadModel.setBadRecordsLocation("");
+      return loadModel;
+    } catch (Exception exception) {
+      System.out.println("Exception occured while fetching load Model " + exception.getMessage());
+      throw new RuntimeException(exception.getMessage());
+    }
   }
 
-  private CarbonDataLoadSchema getCarbonLoadSchema(Configuration configuration) throws IOException {
+  private CarbonDataLoadSchema getCarbonLoadSchema(Configuration configuration) throws Exception {
 
     CarbonTable carbonTable = CarbonTable.buildFromTableInfo(getTableInfo(configuration));
     return new CarbonDataLoadSchema(carbonTable);
