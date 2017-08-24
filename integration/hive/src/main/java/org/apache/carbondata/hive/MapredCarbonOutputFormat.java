@@ -27,7 +27,6 @@ import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
 import org.apache.hadoop.hive.ql.io.HiveOutputFormat;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.util.Progressable;
@@ -40,9 +39,10 @@ class MapredCarbonOutputFormat<T> extends CarbonOutputFormat<T>
 
   protected CarbonOutputFormat<ArrayWritable> realOutputFormat;
 
-  public MapredCarbonOutputFormat(){
+  public MapredCarbonOutputFormat() {
     realOutputFormat = new CarbonOutputFormat<>();
   }
+
   @Override
   public RecordWriter<Void, T> getRecordWriter(FileSystem fileSystem, JobConf jobConf, String s,
       Progressable progressable) throws IOException {
@@ -56,6 +56,17 @@ class MapredCarbonOutputFormat<T> extends CarbonOutputFormat<T>
   @Override public FileSinkOperator.RecordWriter getHiveRecordWriter(JobConf jc, Path finalOutPath,
       Class<? extends Writable> valueClass, boolean isCompressed, Properties tableProperties,
       Progressable progress) throws IOException {
-    return new CarbonRecordWriterWrapper(realOutputFormat, jc, finalOutPath.toString(), progress);
+
+    JobConf properties = new JobConf();
+    properties.set("carbondata.current.database",jc.get("hive.current.database"));
+    //Extract database_name and tablename from location
+    properties.set("carbondata.current.location",jc.get("location"));
+    properties.set("carbondata.schema.dataTypes",jc.get("columns.types"));
+    properties.set("carbondata.schema.columnNames",jc.get("columns"));
+    properties.set("carbondata.serde.lib",jc.get("serialization.lib"));
+    properties.set("carbondata.input.format",jc.get("file.inputformat"));
+
+    return new CarbonRecordWriterWrapper(realOutputFormat, properties, finalOutPath.toString(), progress,
+        tableProperties);
   }
 }
